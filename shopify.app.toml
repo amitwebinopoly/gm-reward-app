@@ -3,22 +3,23 @@
 client_id = "0136a523017d2018b01526946a6aac4d"
 name = "demo-gm-reward-app"
 handle = "demo-gm-reward-app-1"
-application_url = "https://sas-folding-judgment-vatican.trycloudflare.com"
+application_url = "https://judges-organizations-related-conventional.trycloudflare.com"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
 dev_store_url = "hn-checkout-extention-demo-1.myshopify.com"
+include_config_on_deploy = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_discounts,write_products"
+scopes = "write_discounts,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://sas-folding-judgment-vatican.trycloudflare.com/auth/callback",
-  "https://sas-folding-judgment-vatican.trycloudflare.com/auth/shopify/callback",
-  "https://sas-folding-judgment-vatican.trycloudflare.com/api/auth/callback"
+  "https://judges-organizations-related-conventional.trycloudflare.com/auth/callback",
+  "https://judges-organizations-related-conventional.trycloudflare.com/auth/shopify/callback",
+  "https://judges-organizations-related-conventional.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
