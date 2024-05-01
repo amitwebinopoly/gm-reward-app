@@ -3,7 +3,7 @@
 client_id = "0136a523017d2018b01526946a6aac4d"
 name = "demo-gm-reward-app"
 handle = "demo-gm-reward-app-1"
-application_url = "https://judges-organizations-related-conventional.trycloudflare.com"
+application_url = "https://sitemap-zope-revenue-activated.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_discounts,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://judges-organizations-related-conventional.trycloudflare.com/auth/callback",
-  "https://judges-organizations-related-conventional.trycloudflare.com/auth/shopify/callback",
-  "https://judges-organizations-related-conventional.trycloudflare.com/api/auth/callback"
+  "https://sitemap-zope-revenue-activated.trycloudflare.com/auth/callback",
+  "https://sitemap-zope-revenue-activated.trycloudflare.com/auth/shopify/callback",
+  "https://sitemap-zope-revenue-activated.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
