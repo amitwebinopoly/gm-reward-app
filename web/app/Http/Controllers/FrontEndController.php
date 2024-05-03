@@ -183,7 +183,8 @@ class FrontEndController extends Controller {
 								$res['message'] = '';
 								$res['data'] = [
 									'id' => $dcRes['data']['discountCodeBasicCreate']['codeDiscountNode']['id'],
-									'discount_code' => $discount_code
+									'discount_code' => $discount_code,
+									'discount_amount' => bcdiv($discount_amount,1,2)
 								];
 							}else{
 								$res['success'] = 'false';
