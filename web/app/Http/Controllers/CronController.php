@@ -37,7 +37,7 @@ class CronController extends Controller {
 		$GMController = new GMController();
 		$OrderLogsModel = new OrderLogsModel();
 
-		$sql = 'SELECT * FROM order_logs WHERE status="0"';
+		$sql = 'SELECT * FROM order_logs WHERE status="0" LIMIT 2';
 		$orders = $OrderLogsModel->select_raw_query($sql);
 		if(!empty($orders)){
 			foreach($orders as $order){
@@ -48,19 +48,19 @@ class CronController extends Controller {
 
 					$adjust_reward_amount_res = $GMController->adjust_reward_amount($cw_data['MemberNumber'],"D",$order->total_line_items_price);
 					if(isset($adjust_reward_amount_res['RespCode']) && $adjust_reward_amount_res['RespCode']=="200"){
-						$updateArr['gm_api_items_price_res'] = @$adjust_reward_amount_res['RespMessage'];
+						$updateArr['gm_api_items_price_res'] = json_encode($adjust_reward_amount_res,1);
 					}else{
 						$updateArr['status'] = "9";
-						$updateArr['gm_api_items_price_res'] = @$adjust_reward_amount_res['RespMessage'];
+						$updateArr['gm_api_items_price_res'] = json_encode($adjust_reward_amount_res,1);
 					}
 
 					if($order->gm_discount_amount > 0){
-						$adjust_reward_amount_res = $GMController->adjust_reward_amount($cw_data['MemberNumber'],"C",$order->gm_discount_amount);
+						$adjust_reward_amount_res = $GMController->redemption_request($cw_data['MemberNumber'],$order->gm_discount_amount);
 						if(isset($adjust_reward_amount_res['RespCode']) && $adjust_reward_amount_res['RespCode']=="200"){
-							$updateArr['gm_api_discount_price_res'] = @$adjust_reward_amount_res['RespMessage'];
+							$updateArr['gm_api_discount_price_res'] = json_encode($adjust_reward_amount_res,1);
 						}else{
 							$updateArr['status'] = "9";
-							$updateArr['gm_api_discount_price_res'] = @$adjust_reward_amount_res['RespMessage'];
+							$updateArr['gm_api_discount_price_res'] = json_encode($adjust_reward_amount_res,1);
 						}
 					}
 				}else{

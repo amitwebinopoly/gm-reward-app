@@ -133,7 +133,7 @@ class FrontEndController extends Controller {
 					$wallet_data = $GMController->get_member_data_from_member_id($cw_data['MemberNumber']);
 
 					if(isset($wallet_data)){
-						$total_available_points = @$wallet_data['LOY Member']['Total Points'];
+						$total_available_points = floatval(str_replace(',','',@$wallet_data['LOY Member']['Total Points']));
 						if($total_available_points >= $_POST['points']){
 							$discount_amount = floatval($_POST['points'])/floatval($points_exchange);
 							$discount_code = 'GMREWARD_'.$InexController->INEX_random_string();

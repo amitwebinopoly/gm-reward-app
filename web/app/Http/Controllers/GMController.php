@@ -107,5 +107,40 @@ class GMController extends Controller {
         curl_close($curl);
         return json_decode($response,1);
     }
+    public function redemption_request($member_num,$dollar_amount){
+        $curl = curl_init();
+
+        $postData = [
+            'body' => [
+                "SourceCode" => env('GM_API_SOURCE_CODE'),
+                "APIKey" => env('GM_API_KEY'),
+                "MemberNumber" => $member_num,
+                "RedemptionType" => "GMSTORE",
+                "RedemptionAmountInDollars" => $dollar_amount,
+                "RedemptionAmountInPoints" => "",
+                "ExternalTransactionId" => "",
+                "transactionIdempotencyID" => "",
+                "DeliveryDate" => "",
+            ]
+        ];
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $this->baseUrl.'/GMR2GetRedemptionRequest/GetRedemptionRequest',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($postData,1),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Authorization: Basic '.base64_encode(env('GM_API_USERNAME').':'.env('GM_API_PASSWORD'))
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        return json_decode($response,1);
+    }
 
 }
