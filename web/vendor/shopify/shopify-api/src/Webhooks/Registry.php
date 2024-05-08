@@ -95,7 +95,11 @@ final class Registry
                 throw new InvalidArgumentException("Unrecognized delivery method '$deliveryMethod'");
         }
 
-        $callbackAddress = $method->getCallbackAddress($path);
+        if (strpos($path, 'http') !== false) {
+            $callbackAddress = $path;
+        } else {
+            $callbackAddress = $method->getCallbackAddress($path);
+        }
 
         $client = new Graphql(Utils::sanitizeShopDomain($shop), $accessToken);
 

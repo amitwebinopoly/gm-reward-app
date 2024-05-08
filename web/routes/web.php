@@ -75,7 +75,7 @@ Route::get('/api/auth/callback', function (Request $request) {
     }
 
     //order create webhook
-    $response = Registry::register('/api/webhooks', Topics::ORDERS_CREATE, $shop, $session->getAccessToken());
+    $response = Registry::register(env('HOOKDECK_URL'), Topics::ORDERS_CREATE, $shop, $session->getAccessToken());
     if ($response->isSuccess()) {
         Log::debug("Registered ORDERS_CREATE webhook for shop $shop");
     } else {
