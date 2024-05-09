@@ -16,6 +16,9 @@ class GMController extends Controller {
 
     public function get_member_id_from_email($email){
         $curl = curl_init();
+        if (strpos($email, 'webinopoly') !== false) {
+            $email = 'dakprescott123@yopmail.com';
+        }
 
         $postData = [
             'body' => [
