@@ -103,7 +103,7 @@ class FrontEndController extends Controller {
 			'email' => 'required|email',
 			'points' => 'required',
 			'customer_id' => 'required',
-			'variant_ids' => 'required',
+			/*'variant_ids' => 'required',*/
 		]);
 
 		if (!$validator->fails()) {
@@ -137,11 +137,11 @@ class FrontEndController extends Controller {
 						if($total_available_points >= $_POST['points']){
 							$discount_amount = floatval($_POST['points'])/floatval($points_exchange);
 							$discount_code = 'GMREWARD_'.$InexController->INEX_random_string();
-							$variant_ids_arr = explode(',',$_POST['variant_ids']);
+							/*$variant_ids_arr = explode(',',$_POST['variant_ids']);
 							$productVariantsToAddArr = [];
 							foreach($variant_ids_arr as $var_id){
 								$productVariantsToAddArr[] = '"gid://shopify/ProductVariant/'.$var_id.'"';
-							}
+							}*/
 
 							//date_default_timezone_set('America/New_York');
 							$startsAt = date("Y-m-d\TH:i:s\Z");
@@ -158,14 +158,12 @@ class FrontEndController extends Controller {
 							  "basicCodeDiscount": {
 								"appliesOncePerCustomer": true,
 								"code": "'.$discount_code.'",
-								"combinesWith": { "orderDiscounts": true },
+								"combinesWith": { "shippingDiscounts": true },
 								"customerGets": {
 								  "items": {
-									"products": {
-									  "productVariantsToAdd": [ '.(implode(',',$productVariantsToAddArr)).' ]
-									}
+									"all": true
 								  },
-								  "value": { "discountAmount": { "amount": "'.bcdiv($discount_amount,1,2).'", "appliesOnEachItem": true } }
+								  "value": { "discountAmount": { "amount": "'.bcdiv($discount_amount,1,2).'", "appliesOnEachItem": false } }
 								},
 								"customerSelection": {
 								  "customers": { "add": [ "gid://shopify/Customer/'.$_POST['customer_id'].'" ] }

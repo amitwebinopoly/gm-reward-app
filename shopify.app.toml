@@ -3,7 +3,7 @@
 client_id = "0136a523017d2018b01526946a6aac4d"
 name = "demo-gm-reward-app"
 handle = "demo-gm-reward-app-1"
-application_url = "https://troy-owen-perceived-hourly.trycloudflare.com"
+application_url = "https://divorce-zoning-function-sets.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_discounts,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://troy-owen-perceived-hourly.trycloudflare.com/auth/callback",
-  "https://troy-owen-perceived-hourly.trycloudflare.com/auth/shopify/callback",
-  "https://troy-owen-perceived-hourly.trycloudflare.com/api/auth/callback"
+  "https://divorce-zoning-function-sets.trycloudflare.com/auth/callback",
+  "https://divorce-zoning-function-sets.trycloudflare.com/auth/shopify/callback",
+  "https://divorce-zoning-function-sets.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
