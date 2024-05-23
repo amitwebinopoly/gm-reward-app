@@ -27,6 +27,7 @@ Route::get('/', function () {
 //App routes
 Route::post('/fetch_point_conversion_rate',[ AppController::class,'fetch_point_conversion_rate'])->middleware('shopify.auth');
 Route::post('/post_point_conversion_rate',[ AppController::class,'post_point_conversion_rate'])->middleware('shopify.auth');
+Route::post('/order_list_post',[ AppController::class,'order_list_post'])->middleware('shopify.auth');
 
 //frontend APIs
 Route::middleware([EnsureFrontendShopAuth::class])->group(function () {

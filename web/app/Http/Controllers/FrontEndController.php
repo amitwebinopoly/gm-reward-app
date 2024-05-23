@@ -136,7 +136,7 @@ class FrontEndController extends Controller {
 						$total_available_points = floatval(str_replace(',','',@$wallet_data['LOY Member']['Total Points']));
 						if($total_available_points >= $_POST['points']){
 							$discount_amount = floatval($_POST['points'])/floatval($points_exchange);
-							$discount_code = 'GMREWARD_'.$InexController->INEX_random_string();
+							$discount_code = env('GM_CODE_PREFIX').$InexController->INEX_random_string();
 							/*$variant_ids_arr = explode(',',$_POST['variant_ids']);
 							$productVariantsToAddArr = [];
 							foreach($variant_ids_arr as $var_id){
