@@ -42,30 +42,56 @@ class CronController extends Controller {
 		if(!empty($orders)){
 			foreach($orders as $order){
 				$updateArr = ['status' => "1"];
-				$cw_data = $GMController->get_member_id_from_email($order->email);
-				if(isset($cw_data['MemberNumber']) && !empty($cw_data['MemberNumber'])){
-					$updateArr['gm_api_member_res'] = $cw_data['MemberNumber'];
 
-					$adjust_reward_amount_res = $GMController->adjust_reward_amount($cw_data['MemberNumber'],"D",$order->total_line_items_price);
-					if(isset($adjust_reward_amount_res['RespCode']) && $adjust_reward_amount_res['RespCode']=="200"){
-						$updateArr['gm_api_items_price_res'] = json_encode($adjust_reward_amount_res,1);
-					}else{
-						$updateArr['status'] = "9";
-						$updateArr['gm_api_items_price_res'] = json_encode($adjust_reward_amount_res,1);
-					}
+				if($order->log_type == 'orders_create'){
+					//get member_id from GM API
+					$cw_data = $GMController->get_member_id_from_email($order->email);
+					if(isset($cw_data['MemberNumber']) && !empty($cw_data['MemberNumber'])){
+						$updateArr['gm_api_member_res'] = $cw_data['MemberNumber'];
 
-					if($order->gm_discount_amount > 0){
-						$adjust_reward_amount_res = $GMController->redemption_request($cw_data['MemberNumber'],$order->gm_discount_amount);
+						//add points in customer's ac
+						$adjust_reward_amount_res = $GMController->adjust_reward_amount($cw_data['MemberNumber'],"D",$order->total_line_items_price);
 						if(isset($adjust_reward_amount_res['RespCode']) && $adjust_reward_amount_res['RespCode']=="200"){
-							$updateArr['gm_api_discount_price_res'] = json_encode($adjust_reward_amount_res,1);
+							$updateArr['gm_api_items_price_res'] = json_encode($adjust_reward_amount_res,1);
 						}else{
 							$updateArr['status'] = "9";
-							$updateArr['gm_api_discount_price_res'] = json_encode($adjust_reward_amount_res,1);
+							$updateArr['gm_api_items_price_res'] = json_encode($adjust_reward_amount_res,1);
 						}
+
+						//request for redem points from customer's ac
+						if($order->gm_discount_amount > 0){
+							$adjust_reward_amount_res = $GMController->redemption_request($cw_data['MemberNumber'],$order->gm_discount_amount);
+							if(isset($adjust_reward_amount_res['RespCode']) && $adjust_reward_amount_res['RespCode']=="200"){
+								$updateArr['gm_api_discount_price_res'] = json_encode($adjust_reward_amount_res,1);
+							}else{
+								$updateArr['status'] = "9";
+								$updateArr['gm_api_discount_price_res'] = json_encode($adjust_reward_amount_res,1);
+							}
+						}
+					}else{
+						$updateArr['status'] = "9";
+						$updateArr['gm_api_member_res'] = @$cw_data['RespMessage'];
 					}
-				}else{
-					$updateArr['status'] = "9";
-					$updateArr['gm_api_member_res'] = @$cw_data['RespMessage'];
+				}
+				else if($order->log_type == 'refunds_create'){
+					//get member_id from GM API
+					$cw_data = $GMController->get_member_id_from_email($order->email);
+					if(isset($cw_data['MemberNumber']) && !empty($cw_data['MemberNumber'])){
+						$updateArr['gm_api_member_res'] = $cw_data['MemberNumber'];
+
+						//deduct points from customer's ac
+						$adjust_reward_amount_res = $GMController->adjust_reward_amount($cw_data['MemberNumber'],"C",$order->total_line_items_price);
+						if(isset($adjust_reward_amount_res['RespCode']) && $adjust_reward_amount_res['RespCode']=="200"){
+							$updateArr['gm_api_items_price_res'] = json_encode($adjust_reward_amount_res,1);
+						}else{
+							$updateArr['status'] = "9";
+							$updateArr['gm_api_items_price_res'] = json_encode($adjust_reward_amount_res,1);
+						}
+
+					}else{
+						$updateArr['status'] = "9";
+						$updateArr['gm_api_member_res'] = @$cw_data['RespMessage'];
+					}
 				}
 
 				$OrderLogsModel->update_order_logs($order->id, $updateArr);

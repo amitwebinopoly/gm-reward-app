@@ -3,7 +3,7 @@
 client_id = "0136a523017d2018b01526946a6aac4d"
 name = "demo-gm-reward-app"
 handle = "demo-gm-reward-app-1"
-application_url = "https://waste-upper-lanes-fr.trycloudflare.com"
+application_url = "https://consecutive-drug-terrible-laundry.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_discounts,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://waste-upper-lanes-fr.trycloudflare.com/auth/callback",
-  "https://waste-upper-lanes-fr.trycloudflare.com/auth/shopify/callback",
-  "https://waste-upper-lanes-fr.trycloudflare.com/api/auth/callback"
+  "https://consecutive-drug-terrible-laundry.trycloudflare.com/auth/callback",
+  "https://consecutive-drug-terrible-laundry.trycloudflare.com/auth/shopify/callback",
+  "https://consecutive-drug-terrible-laundry.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

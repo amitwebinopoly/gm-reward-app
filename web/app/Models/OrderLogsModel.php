@@ -24,6 +24,14 @@ class OrderLogsModel extends Model{
         return DB::table($this->table)
             ->select('*')
             ->where('order_id',$order_id)
+            ->where('log_type',"orders_create")
+            ->get()->toArray();
+    }
+    public function select_by_refund_id($refund_id){
+        return DB::table($this->table)
+            ->select('*')
+            ->where('refund_id',$refund_id)
+            ->where('log_type',"refunds_create")
             ->get()->toArray();
     }
     public function select_raw_query($sql){

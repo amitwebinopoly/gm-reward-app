@@ -84,6 +84,16 @@ Route::get('/api/auth/callback', function (Request $request) {
             print_r($response->getBody(), true)
         );
     }
+    //refund create webhook
+    $response = Registry::register(env('HOOKDECK_URL'), Topics::REFUNDS_CREATE, $shop, $session->getAccessToken());
+    if ($response->isSuccess()) {
+        Log::debug("Registered REFUNDS_CREATE webhook for shop $shop");
+    } else {
+        Log::error(
+            "Failed to register REFUNDS_CREATE webhook for shop $shop with response body: " .
+            print_r($response->getBody(), true)
+        );
+    }
 
     $redirectUrl = Utils::getEmbeddedAppUrl($host);
     if (Config::get('shopify.billing.required')) {
@@ -143,7 +153,7 @@ Route::post('/api/webhooks', function (Request $request) {
 
         $topic = $request->header(HttpHeaders::X_SHOPIFY_TOPIC, '');
         $shop = $request->header(HttpHeaders::X_SHOPIFY_DOMAIN, '');
-        //$topic = 'orders/create';
+        //$topic = 'refunds/create';
         //$shop = 'gm-company-store.myshopify.com';
 
         /*$response = Registry::process($request->header(), $request->getContent());
@@ -210,6 +220,7 @@ Route::post('/api/webhooks', function (Request $request) {
                     $insertArr = [
                         'shop' => $shop,
                         'order_id' => $order_arr['id'],
+                        'refund_id' => "",
                         'order_number' => $order_arr['name'],
                         'email' => $order_arr['email'],
                         'total_line_items_price' => $order_arr['total_line_items_price'],
@@ -226,11 +237,63 @@ Route::post('/api/webhooks', function (Request $request) {
                         'customer_email' => @$order_arr['customer']['email'],
                         'items' => json_encode($items_arr,1),
 
+                        'log_type' => 'orders_create',
                         'status' => '0',
                         'add_date' => date('d-m-Y h:i:s'),
                     ];
                     $OrderLogsModel->insert_order_logs($insertArr);
 
+                }
+            }
+        }
+        else if($topic=='refunds/create'){
+            $refund_json = $request->getContent();
+            //$refund_json = '{"id":897166278879,"order_id":5612906578143,"created_at":"2024-06-04T09:30:05-04:00","note":"testing refund","user_id":87990173919,"processed_at":"2024-06-04T09:30:05-04:00","restock":true,"duties":[],"total_duties_set":{"shop_money":{"amount":"0.00","currency_code":"USD"},"presentment_money":{"amount":"0.00","currency_code":"USD"}},"return":null,"refund_shipping_lines":[],"admin_graphql_api_id":"gid://shopify/Refund/897166278879","refund_line_items":[{"id":463763505375,"quantity":1,"line_item_id":13932549505247,"location_id":71957315807,"restock_type":"cancel","subtotal":2629.95,"total_tax":0,"subtotal_set":{"shop_money":{"amount":"2629.95","currency_code":"USD"},"presentment_money":{"amount":"2629.95","currency_code":"USD"}},"total_tax_set":{"shop_money":{"amount":"0.00","currency_code":"USD"},"presentment_money":{"amount":"0.00","currency_code":"USD"}},"line_item":{"id":13932549505247,"variant_id":44408614977759,"title":"The 3p Fulfilled Snowboard","quantity":1,"sku":"sku-hosted-1","variant_title":null,"vendor":"HN Checkout Extention Demo 1","fulfillment_service":"snow-city-warehouse","product_id":8125800743135,"requires_shipping":true,"taxable":true,"gift_card":false,"name":"The 3p Fulfilled Snowboard","variant_inventory_management":"shopify","properties":[],"product_exists":true,"fulfillable_quantity":0,"grams":0,"price":"2629.95","total_discount":"0.00","fulfillment_status":null,"price_set":{"shop_money":{"amount":"2629.95","currency_code":"USD"},"presentment_money":{"amount":"2629.95","currency_code":"USD"}},"total_discount_set":{"shop_money":{"amount":"0.00","currency_code":"USD"},"presentment_money":{"amount":"0.00","currency_code":"USD"}},"discount_allocations":[],"duties":[],"admin_graphql_api_id":"gid://shopify/LineItem/13932549505247","tax_lines":[]}}],"transactions":[{"id":6672461529311,"order_id":5612906578143,"kind":"refund","gateway":"bogus","status":"success","message":"Bogus Gateway: Forced success","created_at":"2024-06-04T09:30:05-04:00","test":true,"authorization":null,"location_id":null,"user_id":87990173919,"parent_id":6635511447775,"processed_at":"2024-06-04T09:30:05-04:00","device_id":null,"error_code":null,"source_name":"1830279","payment_details":{"credit_card_bin":"1","avs_result_code":null,"cvv_result_code":null,"credit_card_number":"•••• •••• •••• 1","credit_card_company":"Bogus","buyer_action_info":null,"credit_card_name":"Test","credit_card_wallet":null,"credit_card_expiration_month":2,"credit_card_expiration_year":2025,"payment_method_name":"bogus"},"receipt":{"paid_amount":"2629.95"},"amount":"2629.95","currency":"USD","payment_id":"#1008.3","total_unsettled_set":{"presentment_money":{"amount":"0.0","currency":"USD"},"shop_money":{"amount":"0.0","currency":"USD"}},"manual_payment_gateway":false,"admin_graphql_api_id":"gid://shopify/OrderTransaction/6672461529311"}],"order_adjustments":[]}';
+
+            $refund_arr = json_decode($refund_json,1);
+            if(isset($refund_arr['refund_line_items']) && !empty($refund_arr['refund_line_items']) ){
+                $refundExist = $OrderLogsModel->select_by_refund_id($refund_arr['id']);
+                if(empty($refundExist)){
+                    $orderExist = $OrderLogsModel->select_by_order_id($refund_arr['order_id']);
+                    if(!empty($orderExist)){
+                        $total_line_items_price = 0;
+                        $items_arr = [];
+                        foreach($refund_arr['refund_line_items'] as $item){
+                            $total_line_items_price += floatval($item['subtotal']);
+                            $items_arr[] = [
+                                'title' => $item['line_item']['title'],
+                                'price' => $item['line_item']['price'],
+                                'quantity' => $item['line_item']['quantity'],
+                                'sku' => $item['line_item']['sku'],
+                            ];
+                        }
+
+                        $insertArr = [
+                            'shop' => $shop,
+                            'order_id' => $refund_arr['order_id'],
+                            'refund_id' => $refund_arr['id'],
+                            'order_number' => "",
+                            'email' => $orderExist[0]->email,
+                            'total_line_items_price' => $total_line_items_price,
+                            'gm_discount_amount' => "",
+                            'gm_discount_code' => "",
+                            'gm_api_member_res' => '',
+                            'gm_api_items_price_res' => '',
+                            'gm_api_discount_price_res' => '',
+
+                            'customer_first_name' => "",
+                            'customer_last_name' => "",
+                            'customer_address' => "",
+                            'customer_phone' => "",
+                            'customer_email' => "",
+                            'items' => json_encode($items_arr,1),
+
+                            'log_type' => 'refunds_create',
+                            'status' => '0',
+                            'add_date' => date('d-m-Y h:i:s'),
+                        ];
+                        $OrderLogsModel->insert_order_logs($insertArr);
+                    }
                 }
             }
         }
